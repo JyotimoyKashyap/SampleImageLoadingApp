@@ -3,31 +3,38 @@ package io.jyotimoykashyap.apptobenchmark
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import io.jyotimoykashyap.apptobenchmark.models.Photo
 import io.jyotimoykashyap.apptobenchmark.repository.RestRepository
 import io.jyotimoykashyap.apptobenchmark.screens.RandomJsonPlaceholderApiList
 import io.jyotimoykashyap.apptobenchmark.ui.theme.AppToBenchmarkTheme
 import io.jyotimoykashyap.apptobenchmark.vm.RestViewModel
-import io.jyotimoykashyap.apptobenchmark.vm.RestViewModelProviderFactory
 
 class MainActivity : ComponentActivity() {
-
-    lateinit var viewModel: RestViewModel
+    private val repository = RestRepository()
+    private val viewModel by viewModels<RestViewModel> {
+        viewModelFactory {
+            initializer {
+                RestViewModel(
+                    restRepository = repository
+                )
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val repository = RestRepository()
-        val viewModelProviderFactory = RestViewModelProviderFactory(repository)
-        viewModel = ViewModelProvider(this, viewModelProviderFactory)[RestViewModel::class.java]
 
         setContent {
             AppToBenchmarkTheme {
@@ -36,19 +43,23 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
+                    val photos = viewModel.photos.observeAsState()
 
+                    LaunchedEffect(Unit) {
+                        viewModel.getPhotos()
+                    }
+
+                    if (photos.value?.data?.isEmpty() == true) {
+                        CircularProgressIndicator()
+                    } else {
+                        photos.value?.data?.let {
+                            RandomJsonPlaceholderApiList(photos = it)
+                        }
+                    }
                 }
             }
         }
     }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
 }
 
 @Preview(showBackground = true)

@@ -2,7 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("kotlin-parcelize")
-    id("kotlin-kapt")
+    // id("kotlin-kapt")
 }
 
 android {
@@ -82,10 +82,11 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion")
     // Lifecycles only (without ViewModel or LiveData)
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
+    implementation("androidx.compose.runtime:runtime-livedata:1.5.0")
 
     // Saved state module for ViewModel
     implementation("androidx.lifecycle:lifecycle-viewmodel-savedstate:$lifecycleVersion")
 
     // Annotation processor
-    kapt("androidx.lifecycle:lifecycle-compiler:$lifecycleVersion")
+    // kapt("androidx.lifecycle:lifecycle-compiler:$lifecycleVersion")
 }
